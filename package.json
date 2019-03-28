@@ -1,0 +1,21 @@
+{
+  "name": "opendoormedia",
+  "version": "1.0.0",
+  "description": "P2P streaming network based on WebRTC",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "keywords": [
+    "P2P",
+    "streaming",
+    "WebRTC"
+  ],
+  "author": "Xiaosui (Max)",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.4",
+    "webrtc": "^1.14.1"
+  }
+}

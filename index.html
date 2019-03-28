@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link href="css/main.css" rel="stylesheet" style="text/css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.js" data-main="js/main"></script>
+	<title>OpenDoor - P2P streaming network based on WebRTC</title>
+</head>
+
+<body>
+	<div id="main">
+		<div id="top" class="navbar">
+			<p>OpenDoor</p>
+		</div>
+		<div id="content-container">
+			<div class="container-fluid">
+				<div class="main-container">
+					<div class="main-dialog">
+						<div class="main-panel">
+							<div class="media-container">
+								<span class="media-center-text">No Source</span>
+								<video id="media" width="640" height="480" autoplay></video>
+							</div>
+							<div class="button-layer">
+								<button class="play-button pacman-button"
+									v-on:click="!streaming?startStreaming():stopStreaming()">
+									<div class="mouth" v-show="!streaming">
+									</div>
+									<div class="pacman" v-bind:class="{ broadcasting: streaming }">
+									</div>
+								</button>
+								<button class="play-button" v-on:click="!playing?start():stop()">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35">
+										<path v-show="!playing"
+											d="M11,10 L18,13.74 18,22.28 11,26 M18,13.74 L26,18 26,18 18,22.28" />
+										<path v-show="playing" v-cloak
+											d="M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26" />
+									</svg>
+								</button>
+								<button class="play-button wrench-button">
+									<svg class="wrench-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22">
+										<path
+											d="M19.164 8.861L17.6 8.6a6.978 6.978 0 0 0-1.186-2.099l.574-1.533a1 1 0 0 0-.436-1.217l-1.997-1.153a1.001 1.001 0 0 0-1.272.23l-1.008 1.225a7.04 7.04 0 0 0-2.55.001L8.716 2.829a1 1 0 0 0-1.272-.23L5.447 3.751a1 1 0 0 0-.436 1.217l.574 1.533A6.997 6.997 0 0 0 4.4 8.6l-1.564.261A.999.999 0 0 0 2 9.847v2.306c0 .489.353.906.836.986l1.613.269a7 7 0 0 0 1.228 2.075l-.558 1.487a1 1 0 0 0 .436 1.217l1.997 1.153c.423.244.961.147 1.272-.23l1.04-1.263a7.089 7.089 0 0 0 2.272 0l1.04 1.263a1 1 0 0 0 1.272.23l1.997-1.153a1 1 0 0 0 .436-1.217l-.557-1.487c.521-.61.94-1.31 1.228-2.075l1.613-.269a.999.999 0 0 0 .835-.986V9.847a.999.999 0 0 0-.836-.986zM11 15a4 4 0 1 1 0-8 4 4 0 0 1 0 8z">
+										</path>
+									</svg>
+									<div class="wrench-menu">
+										<div>
+											resolution
+										</div>
+									</div>
+								</button>
+							</div>
+						</div>
+						<div class="channel-panel">
+							<div class="channel-header">
+								<span>
+									channels
+								</span>
+							</div>
+							<div class="channel-entry">
+								Channel 1
+							</div>
+							<div class="channel-entry">
+								Channel 2
+							</div>
+							<div class="channel-entry">
+								Channel 3
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
