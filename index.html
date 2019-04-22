@@ -21,7 +21,7 @@
 					<div class="main-dialog">
 						<div class="main-panel">
 							<div class="media-container">
-								<span class="media-center-text">No Source</span>
+								<span class="media-center-text" v-show="!playing">No Source</span>
 								<video id="media" width="640" height="480" autoplay></video>
 							</div>
 							<div class="button-layer">

@@ -1,13 +1,16 @@
-define(['vue', 'common', "jquery"], function (Vue, common, $) {
+define(['vue', 'common', "jquery"], function(Vue, common, $) {
 	common.test();
 
 	var v = new Vue({
 		el: "#main",
 		data: {
-			constraints: {audio: false,
-				video: true},
+			constraints: {
+				audio: false,
+				video: true
+			},
 			playing: false,
 			streaming: false,
+			localStream: null,
 			track: null,
 		},
 
@@ -31,10 +34,38 @@ define(['vue', 'common', "jquery"], function (Vue, common, $) {
 				track.stop();
 				this.playing = false;
 				video.srcObject = null;
+				this.localStream = false;
 			},
 
-			startStreaming() {
-				this.streaming = true;
+			async startStreaming() {
+				var rpcConfig = {};
+				var offerConfig = {};
+				
+				if (confirm("Start broadcasting your channel?")) {
+					this.streaming = true;
+					pc1 = new RTCPeerConnection(rpcConfig);
+					console.log('Initialize peer connection object');
+					if (this.localStream == null) {
+						this.streaming = false;
+						alert("Local stream has not started, please try again");
+					} else {
+						this.localStream.getTracks().forEach(track => pc1.addTrack(track, this.localStream));
+					}
+					try {
+						 offer = await pc1.createOffer(offerConfig);
+						 console.log('pc1 createOffer start');
+						 console.log(offer);
+					} catch(e) {
+						console.log(e);
+					}
+				}
+			},
+
+			onIceStateChange(pc, event) {
+				if (pc) {
+					console.log(`${getName(pc)} ICE state: ${pc.iceConnectionState}`);
+					console.log('ICE state change event: ', event);
+				}
 			},
 
 			stopStreaming() {
@@ -45,6 +76,7 @@ define(['vue', 'common', "jquery"], function (Vue, common, $) {
 				video = document.getElementById('media');
 				track = stream.getVideoTracks()[0];
 				video.srcObject = stream;
+				this.localStream = stream;
 			},
 
 			handleError(error) {
