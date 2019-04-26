@@ -1,5 +1,4 @@
 const express = require('express')
-const miaoding = require('simple-peer')
 const app = express()
 const port = 3000
 

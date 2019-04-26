@@ -44,6 +44,15 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 						answer = await v.pcs.remote.createAnswer(this.answerConfig);
 						v.pcs.remote.setLocalDescription(answer);
 						coordinator.createAnswer(data.id, answer);
+						v.pcs.remote.addEventListener('track', 
+							function(e) {
+								video = document.getElementById('media');
+								if (video.srcObject !== e.streams[0]) {
+									video.srcObject = e.streams[0];
+									console.log('recieve remote stream');
+								}
+							}
+						);
 					} catch (e) {
 						console.log(e);
 					}
@@ -98,7 +107,8 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			
 			onAcceptAnswer(data) {
 				v = this;
-				v.pcs[data.id].setRemoteDescription(data.data.data);
+				console.log(data.data);
+				v.pcs[data.id].setRemoteDescription(data.data);
 				console.log("Connection done, ready to broadcast");
 			},
 
