@@ -1,4 +1,4 @@
-define(['vue', 'common', "jquery"], function(Vue, common, $) {
+define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coordinator) {
 	common.test();
 
 	var v = new Vue({
@@ -12,14 +12,12 @@ define(['vue', 'common', "jquery"], function(Vue, common, $) {
 			streaming: false,
 			localStream: null,
 			track: null,
+			channelName: "",
+			channels: {},
+			offerIds: [],
 		},
 
 		methods: {
-			uploadImage(e) {
-				$('input[type=file]').trigger('click');
-				return false;
-			},
-
 			async start(e) {
 				try {
 					const stream = await navigator.mediaDevices.getUserMedia(this.constraints);
@@ -28,6 +26,20 @@ define(['vue', 'common', "jquery"], function(Vue, common, $) {
 				} catch (e) {
 					this.handleError(e);
 				}
+			},
+
+			async connect(name) {
+				v = this;
+				console.log(name);
+				coordinator.getOfferByChannel(name, function(data) {
+					try {
+// 						const answer = await pc2.createAnswer();
+// 						await onCreateAnswerSuccess(answer);
+						console.log(data);
+					} catch (e) {
+// 						onCreateSessionDescriptionError(e);
+					}
+				});
 			},
 
 			stop() {
@@ -40,23 +52,31 @@ define(['vue', 'common', "jquery"], function(Vue, common, $) {
 			async startStreaming() {
 				var rpcConfig = {};
 				var offerConfig = {};
-				
+				var v = this;
+
 				if (confirm("Start broadcasting your channel?")) {
 					this.streaming = true;
 					pc1 = new RTCPeerConnection(rpcConfig);
+					console.log(pc1)
 					console.log('Initialize peer connection object');
 					if (this.localStream == null) {
 						this.streaming = false;
 						alert("Local stream has not started, please try again");
 					} else {
 						this.localStream.getTracks().forEach(track => pc1.addTrack(track, this.localStream));
-					}
-					try {
-						 offer = await pc1.createOffer(offerConfig);
-						 console.log('pc1 createOffer start');
-						 console.log(offer);
-					} catch(e) {
-						console.log(e);
+						try {
+							offer = await pc1.createOffer(offerConfig);
+							console.log('pc1 createOffer start');
+							console.log(offer);
+							console.log(JSON.stringify(offer));
+							this.channelName = prompt("Please enter your channel name", "Channel Name");
+							coordinator.createOffer(this.channelName, offer,
+								function(data) {
+									v.offerIds.push(data.id);
+								});
+						} catch (e) {
+							console.log(e);
+						}
 					}
 				}
 			},
@@ -92,4 +112,20 @@ define(['vue', 'common', "jquery"], function(Vue, common, $) {
 			}
 		}
 	});
+
+	function timeout(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+	async function syncChannel() {
+		while (true) {
+			console.log('Get me the channels');
+			coordinator.getChannelList(function(data) {
+				v.channels = data.channels;
+			});
+			await timeout(3000);
+		}
+	}
+
+	syncChannel();
 });

@@ -7,12 +7,13 @@
 }
 
 .navbar {
-	height: 40px;	
+	height: 40px;
 	min-height: 0;
 	margin: 0;
 	padding: 0;
 	border-radius: 2px;
 }
+
 /*top*/
 #top {
 	background-color: #6A936D;
@@ -47,6 +48,7 @@
 	padding: 6px 6px 6px 6px;
 	border: 1px solid #e1e2e5;
 	display: inline-flex;
+	height: 550px;
 }
 
 .main-panel {
@@ -77,25 +79,25 @@
 
 .button-layer {
 	margin-top: 1px;
-    margin-bottom: 1px;
-    height: 50px;
-    display: inline-flex;
-    position: relative;
+	margin-bottom: 1px;
+	height: 50px;
+	display: inline-flex;
+	position: relative;
 }
 
 .play-button {
-    width: 60px;
-    height: 50px;
-    background-color: inherit;
-    border-left: 0;
-    outline: none;
-    display: inline;
-    text-align: -webkit-center;
-    box-shadow: none;
-    border-right: 2px solid white;
-    border-top: 0;
+	width: 60px;
+	height: 50px;
+	background-color: inherit;
+	border-left: 0;
+	outline: none;
+	display: inline;
+	text-align: -webkit-center;
+	box-shadow: none;
+	border-right: 2px solid white;
+	border-top: 0;
 	border-bottom: 0;
-	position:relative;
+	position: relative;
 }
 
 .play-button:hover {
@@ -112,12 +114,12 @@
 
 .play-button .pacman {
 	display: block;
-    z-index: auto;
-    width: 0;
-    border: 12px solid white;
-    -webkit-border-radius: 100px;
-    border-radius: 100px;
-    transform: scaleX(1) scaleY(1) scaleZ(1);
+	z-index: auto;
+	width: 0;
+	border: 12px solid white;
+	-webkit-border-radius: 100px;
+	border-radius: 100px;
+	transform: scaleX(1) scaleY(1) scaleZ(1);
 }
 
 .wrench-image {
@@ -125,22 +127,23 @@
 }
 
 .wrench-menu {
-    position: absolute;
-    width: 120px;
-    height: 200px;
-    background: rgb(178, 197, 179);
-    top: -200px;
+	position: absolute;
+	width: 120px;
+	height: 200px;
+	background: rgb(178, 197, 179);
+	top: -200px;
 	left: -2px;
 	display: none;
 	padding: 3px 3px 3px 3px;
 }
 
-.wrench-button:hover > .wrench-menu {
+.wrench-button:hover>.wrench-menu {
 	display: block;
 }
 
 .broadcasting {
-    border-right-color: rgba(255,255,255,0)  !important;;
+	border-right-color: rgba(255, 255, 255, 0) !important;
+	;
 }
 
 .pacman-button {
@@ -149,36 +152,36 @@
 
 .pacman:before {
 	display: block;
-    -webkit-box-sizing: content-box;
-    -moz-box-sizing: content-box;
-    box-sizing: content-box;
-    float: none;
-    z-index: auto;
-    width: 7px;
-    height: 7px;
-    position: absolute;
-    content: "";
-    opacity: 1;
-    top: -10px;
-    left: -4px;
-    border: 0 solid rgba(0,0,0,1);
-    -webkit-border-radius: 15px;
-    border-radius: 15px;
-    font: normal normal normal 16px/normal Arial, Helvetica, sans-serif;
-    color: rgba(0,0,0,0.9);
-    background: #6A936D;
-    -webkit-transform: scaleX(1) scaleY(1) scaleZ(1);
-    transform: scaleX(1) scaleY(1) scaleZ(1);
-    -webkit-transform-origin: 50% 50% 0;
+	-webkit-box-sizing: content-box;
+	-moz-box-sizing: content-box;
+	box-sizing: content-box;
+	float: none;
+	z-index: auto;
+	width: 7px;
+	height: 7px;
+	position: absolute;
+	content: "";
+	opacity: 1;
+	top: -10px;
+	left: -4px;
+	border: 0 solid rgba(0, 0, 0, 1);
+	-webkit-border-radius: 15px;
+	border-radius: 15px;
+	font: normal normal normal 16px/normal Arial, Helvetica, sans-serif;
+	color: rgba(0, 0, 0, 0.9);
+	background: #6A936D;
+	-webkit-transform: scaleX(1) scaleY(1) scaleZ(1);
+	transform: scaleX(1) scaleY(1) scaleZ(1);
+	-webkit-transform-origin: 50% 50% 0;
 }
 
 .mouth {
 	z-index: 10;
-    width: 11px;
-    height: 2px;
-    background-color: #6A936D;
-    top: 26px;
-    position: absolute;
+	width: 11px;
+	height: 2px;
+	background-color: #6A936D;
+	top: 26px;
+	position: absolute;
 	left: 30px;
 	pointer-events: none;
 }
@@ -188,7 +191,9 @@
 .channel-panel {
 	width: 150px;
 	background-color: white;
+	overflow: auto;
 }
+
 .channel-header {
 	text-align: center;
 	background-color: rgb(178, 197, 179);
@@ -201,9 +206,30 @@
 }
 
 .channel-entry {
-	text-align: center;
-	padding-top: 4px;
 	height: 30px;
 	background-color: white;
+	text-align: center;
 	font: 14px cursive;
+	border: 5px solid transparent;
+	-webkit-touch-callout: none;
+	/* iOS Safari */
+	-webkit-user-select: none;
+	/* Safari */
+	-khtml-user-select: none;
+	/* Konqueror HTML */
+	-moz-user-select: none;
+	/* Firefox */
+	-ms-user-select: none;
+	/* Internet Explorer/Edge */
+	user-select: none;
+	/* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+.channel-entry:hover {
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border: 5px solid rgb(178, 197, 179);
+	cursor: pointer;
 }

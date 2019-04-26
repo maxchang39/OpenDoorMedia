@@ -60,14 +60,10 @@
 									channels
 								</span>
 							</div>
-							<div class="channel-entry">
-								Channel 1
-							</div>
-							<div class="channel-entry">
-								Channel 2
-							</div>
-							<div class="channel-entry">
-								Channel 3
+							<div v-cloak class="channel-entry" v-for="channel in channels">
+								<div v-on:click="connect(channel)">
+								{{channel}}
+								</div>
 							</div>
 						</div>
 					</div>
