@@ -28,6 +28,13 @@
 	font-size: 18px;
 	font-family: cursive;
 }
+.input-channel-id-text {
+	margin-right: 5px;
+}
+
+.input-channel-id-input {
+	margin-right: 20px;
+}
 
 #content-container {
 	height: 600px;

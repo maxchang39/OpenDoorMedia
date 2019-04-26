@@ -14,7 +14,12 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			track: null,
 			channelName: "",
 			channels: {},
+			offerIdInput: 1383,
 			offerIds: [],
+			pcs: [],
+			rpcConfig: {},
+			offerConfig: {},
+			answerConfig: {},
 		},
 
 		methods: {
@@ -31,13 +36,16 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			async connect(name) {
 				v = this;
 				console.log(name);
-				coordinator.getOfferByChannel(name, function(data) {
+				coordinator.getOfferByChannel(name, async function(data) {
 					try {
-// 						const answer = await pc2.createAnswer();
-// 						await onCreateAnswerSuccess(answer);
-						console.log(data);
+						var scp = data.data.data;
+						v.pcs.remote = new RTCPeerConnection(this.rpcConfig);
+						v.pcs.remote.setRemoteDescription(scp);
+						answer = await v.pcs.remote.createAnswer(this.answerConfig);
+						v.pcs.remote.setLocalDescription(answer);
+						coordinator.createAnswer(data.id, answer);
 					} catch (e) {
-// 						onCreateSessionDescriptionError(e);
+						console.log(e);
 					}
 				});
 			},
@@ -50,29 +58,26 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			},
 
 			async startStreaming() {
-				var rpcConfig = {};
-				var offerConfig = {};
 				var v = this;
 
 				if (confirm("Start broadcasting your channel?")) {
 					this.streaming = true;
-					pc1 = new RTCPeerConnection(rpcConfig);
-					console.log(pc1)
+					var pc = new RTCPeerConnection(this.rpcConfig);
 					console.log('Initialize peer connection object');
 					if (this.localStream == null) {
 						this.streaming = false;
 						alert("Local stream has not started, please try again");
 					} else {
-						this.localStream.getTracks().forEach(track => pc1.addTrack(track, this.localStream));
+						this.localStream.getTracks().forEach(track => pc.addTrack(track, this.localStream));
 						try {
-							offer = await pc1.createOffer(offerConfig);
-							console.log('pc1 createOffer start');
-							console.log(offer);
-							console.log(JSON.stringify(offer));
+							offer = await pc.createOffer(this.offerConfig);
+							await pc.setLocalDescription(offer);
+							
 							this.channelName = prompt("Please enter your channel name", "Channel Name");
 							coordinator.createOffer(this.channelName, offer,
 								function(data) {
 									v.offerIds.push(data.id);
+									v.pcs[data.id] = pc;
 								});
 						} catch (e) {
 							console.log(e);
@@ -80,16 +85,21 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 					}
 				}
 			},
-
-			onIceStateChange(pc, event) {
-				if (pc) {
-					console.log(`${getName(pc)} ICE state: ${pc.iceConnectionState}`);
-					console.log('ICE state change event: ', event);
-				}
+			
+			setOfferId(e) {
+				this.offerIds = [this.offerIdInput];
+				console.log(this.offerIds);
+				window.alert("Offer Id is set to " + this.offerIdInput);
 			},
 
 			stopStreaming() {
 				this.streaming = false;
+			},
+			
+			onAcceptAnswer(data) {
+				v = this;
+				v.pcs[data.id].setRemoteDescription(data.data.data);
+				console.log("Connection done, ready to broadcast");
 			},
 
 			handleSuccess(stream) {
@@ -126,6 +136,19 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			await timeout(3000);
 		}
 	}
+	
+	async function acceptAnswer() {
+		while (true) {
+			console.log('Get me the answers for my offer');
+			v.offerIds.forEach(async function(id) {
+				coordinator.getAnswerByOfferId(id, function(data) {
+					v.onAcceptAnswer(data);
+				});
+			});
+			await timeout(3000);
+		}
+	}
 
 	syncChannel();
+	acceptAnswer();
 });
