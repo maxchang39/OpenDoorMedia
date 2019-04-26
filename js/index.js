@@ -47,6 +47,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 						v.pcs.remote.addEventListener('track', 
 							function(e) {
 								video = document.getElementById('media');
+								console.log("hello world!")
 								if (video.srcObject !== e.streams[0]) {
 									video.srcObject = e.streams[0];
 									console.log('recieve remote stream');
@@ -77,7 +78,8 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 						this.streaming = false;
 						alert("Local stream has not started, please try again");
 					} else {
-						this.localStream.getTracks().forEach(track => pc.addTrack(track, this.localStream));
+						//this.localStream.getTracks().forEach(track => pc.addTrack(track, this.localStream));
+						pc.addTrack(this.localStream.getTracks()[0], this.localStream);
 						try {
 							offer = await pc.createOffer(this.offerConfig);
 							await pc.setLocalDescription(offer);
