@@ -51,7 +51,18 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 				v = this;
 				v.connectedChannel = name;
 				console.log(name);
-				v.syncIces(name);
+				
+				v.pcs.local.addEventListener('track',
+					function(e) {
+						video = document.getElementById('media');
+						alert("hello world!")
+						if (video.srcObject !== e.streams[0]) {
+							video.srcObject = e.streams[0];
+							console.log('recieve remote stream');
+							v.leftTopIndication = "Live";
+						}
+					}
+				);
 
 				coordinator.getOfferByChannel(name, async function(data) {
 					try {
@@ -61,17 +72,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 						answer = await v.pcs.local.createAnswer(this.answerConfig);
 						await v.pcs.local.setLocalDescription(answer);
 						coordinator.createAnswer(data.id, answer);
-						v.pcs.local.addEventListener('track',
-							function(e) {
-								video = document.getElementById('media');
-								alert("hello world!")
-								if (video.srcObject !== e.streams[0]) {
-									video.srcObject = e.streams[0];
-									console.log('recieve remote stream');
-									v.leftTopIndication = "Live";
-								}
-							}
-						);
+						v.syncIces(name);
 					} catch (e) {
 						console.log(e);
 					}
