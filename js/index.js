@@ -51,7 +51,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 				v = this;
 				v.connectedChannel = name;
 				console.log(name);
-				
+
 				v.pcs.local.addEventListener('track',
 					function(e) {
 						video = document.getElementById('media');
@@ -178,13 +178,13 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 
 			async syncIces(name) {
 				while (true) {
-// 					if (v.connectedChannel == "") {
-// 						name = "4321";
-// 					} else {
-// 						name = "1234";
-// 					}
+					// 					if (v.connectedChannel == "") {
+					// 						name = "4321";
+					// 					} else {
+					// 						name = "1234";
+					// 					}
 					console.log(name);
-					
+
 					coordinator.getIceByChannel(name, function(data) {
 						data.forEach(function(ice) {
 							console.log(ice.data.data);
@@ -221,7 +221,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			v.offerIds.forEach(async function(id) {
 				coordinator.getAnswerByOfferId(id, function(data) {
 					console.log(data);
-					if(data.data != undefined) {
+					if (data.data != undefined) {
 						console.log("Aceept new answer");
 						v.onAcceptAnswer(data);
 					} else {
@@ -234,8 +234,26 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 	}
 
 	v.pcs.local = new RTCPeerConnection(v.rpcConfig);
- 	v.pcs.local.addEventListener('icecandidate', e => v.onIceCandidate(v.pcs.local, e));
- 	v.pcs.local.addEventListener('iceconnectionstatechange', e => v.onIceStateChange(v.pcs.local, e));
+	v.pcs.local.addEventListener('icecandidate', e => v.onIceCandidate(v.pcs.local, e));
+	v.pcs.local.addEventListener('iceconnectionstatechange', e => v.onIceStateChange(v.pcs.local, e));
+	v.pcs.local.onconnectionstatechange = function(event) {
+		switch (v.pcs.local.connectionState) {
+			case "connected":
+				alert("Connection is " + v.pcs.local.connectionState);		
+				break;
+			case "disconnected":
+				alert("Connection is " + v.pcs.local.connectionState);
+				break;
+			case "failed":
+				alert("Connection is " + v.pcs.local.connectionState);
+				// One or more transports has terminated unexpectedly or in an error
+				break;
+			case "closed":
+				alert("Connection is " + v.pcs.local.connectionState);
+				// The connection has been closed
+				break;
+		}
+	}
 
 	syncChannel();
 	acceptAnswer();
