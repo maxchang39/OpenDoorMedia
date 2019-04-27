@@ -229,7 +229,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 					}
 				});
 			});
-			await timeout(5000);
+			await timeout(3000);
 		}
 	}
 
