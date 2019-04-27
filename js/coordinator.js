@@ -1,5 +1,42 @@
 define(["jquery"], function($) {
 	var http = {};
+	
+	http.createIceCandidate = function(name, data, callback) {
+		$.ajax({
+			url: "https://i9ew2l7r5c.execute-api.us-west-2.amazonaws.com/prod/ice",
+			crossDomain: true,
+			dataType: 'json',
+			type: "POST",
+			contentType: 'application/json; charset=utf-8',
+			data: JSON.stringify({
+				"name": name,
+				"data": data
+			}),
+			success: function(data) {
+				callback(data);
+			},
+			error: function(data) {
+			}
+		});
+	}
+	
+	http.getIceByChannel = function(name, callback) {
+		$.ajax({
+			url: "https://i9ew2l7r5c.execute-api.us-west-2.amazonaws.com/prod/test",
+			crossDomain: true,
+			dataType: 'json',
+			type: "GET",
+			contentType: 'application/json; charset=utf-8',
+			data: {
+				"channel": name,
+			},
+			success: function(data) {
+				callback(data);
+			},
+			error: function(data) {
+			}
+		});
+	}
 
 	http.createOffer = function(name, data, callback) {
 		if (!name) {
@@ -30,7 +67,7 @@ define(["jquery"], function($) {
 				alert("Error occurs");
 			}
 		});
-	}
+	},
 
 	http.getChannelList = function(callback) {
 		$.ajax({

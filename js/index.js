@@ -17,9 +17,20 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			offerIdInput: 1383,
 			offerIds: [],
 			pcs: [],
-			rpcConfig: {},
+			offers: {},
+			rpcConfig: {
+				iceServers: [{
+						urls: 'stun:stun.l.google.com:19302'
+					},
+					{
+						urls: 'stun:global.stun.twilio.com:3478?transport=udp'
+					}
+				],
+				sdpSemantics: 'unified-plan'
+			},
 			offerConfig: {},
 			answerConfig: {},
+			connectedChannel: "",
 		},
 
 		methods: {
@@ -35,16 +46,20 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 
 			async connect(name) {
 				v = this;
+				v.connectedChannel = name;
 				console.log(name);
+				v.syncIces(name);
+
 				coordinator.getOfferByChannel(name, async function(data) {
 					try {
 						var scp = data.data.data;
-						v.pcs.remote = new RTCPeerConnection(this.rpcConfig);
-						v.pcs.remote.setRemoteDescription(scp);
-						answer = await v.pcs.remote.createAnswer(this.answerConfig);
-						v.pcs.remote.setLocalDescription(answer);
+
+						v.pcs.local.setRemoteDescription(scp);
+						answer = await v.pcs.local.createAnswer(this.answerConfig);
+						v.pcs.local.setLocalDescription(answer);
+
 						coordinator.createAnswer(data.id, answer);
-						v.pcs.remote.addEventListener('track', 
+						v.pcs.local.addEventListener('track',
 							function(e) {
 								video = document.getElementById('media');
 								console.log("hello world!")
@@ -72,23 +87,28 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 
 				if (confirm("Start broadcasting your channel?")) {
 					this.streaming = true;
-					var pc = new RTCPeerConnection(this.rpcConfig);
 					console.log('Initialize peer connection object');
+
+					// 					v.pcs.local.addEventListener('icecandidate', e => v.onIceCandidate(v.pcs.local, e));
+					// 					v.pcs.local.addEventListener('iceconnectionstatechange', e => v.onIceStateChange(v.pcs.local, e));
+					// 					
 					if (this.localStream == null) {
 						this.streaming = false;
 						alert("Local stream has not started, please try again");
 					} else {
-						//this.localStream.getTracks().forEach(track => pc.addTrack(track, this.localStream));
-						pc.addTrack(this.localStream.getTracks()[0], this.localStream);
+						// this.localStream.getTracks().forEach(track => v.pcs.local.addTrack(track, this.localStream));
+						v.pcs.local.addTrack(this.localStream.getTracks()[0], this.localStream);
 						try {
-							offer = await pc.createOffer(this.offerConfig);
-							await pc.setLocalDescription(offer);
-							
+							offer = await v.pcs.local.createOffer(this.offerConfig);
+							await v.pcs.local.setLocalDescription(offer);
+
 							this.channelName = prompt("Please enter your channel name", "Channel Name");
+							v.syncIces(v.channelName);
+
 							coordinator.createOffer(this.channelName, offer,
 								function(data) {
 									v.offerIds.push(data.id);
-									v.pcs[data.id] = pc;
+									v.offers[data.id] = offer;
 								});
 						} catch (e) {
 							console.log(e);
@@ -96,7 +116,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 					}
 				}
 			},
-			
+
 			setOfferId(e) {
 				this.offerIds = [this.offerIdInput];
 				console.log(this.offerIds);
@@ -106,11 +126,11 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			stopStreaming() {
 				this.streaming = false;
 			},
-			
+
 			onAcceptAnswer(data) {
 				v = this;
 				console.log(data.data);
-				v.pcs[data.id].setRemoteDescription(data.data);
+				v.pcs.local.setRemoteDescription(data.data);
 				console.log("Connection done, ready to broadcast");
 			},
 
@@ -131,6 +151,47 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 						'order fo	r the demo to work.');
 				}
 				console.log(`getUserMedia error: ${error.name}`, error);
+			},
+
+			async onIceCandidate(pc, event) {
+				try {
+					coordinator.createIceCandidate(v.channelName, event.candidate, function() {});
+				} catch (e) {
+					console.log("create ice failed on local name");
+				}
+				try {
+					coordinator.createIceCandidate(v.connectedChannel, event.candidate, function() {});
+				} catch (e) {
+					console.log("create ice failed on remote name");
+				}
+				console.log(`${this.getName(pc)} ICE candidate:\n${event.candidate ? event.candidate.candidate : '(null)'}`);
+			},
+
+			onIceStateChange(pc, event) {
+				if (pc) {
+					console.log(`${this.getName(pc)} ICE state: ${pc.iceConnectionState}`);
+					console.log('ICE state change event: ', event);
+				}
+			},
+
+			onAddIceCandidateError(pc, error) {
+				console.log(`${this.getName(pc)} failed to add ICE Candidate: ${error.toString()}`);
+			},
+
+			async syncIces(name) {
+				while (true) {
+					coordinator.getIceByChannel(name, async function(data) {
+						data.forEach(async function(ice) {
+							console.log(ice.data.data);
+							v.pcs.local.addIceCandidate(ice.data.data);
+						});
+					});
+					await timeout(5000);
+				}
+			},
+
+			getName(pc) {
+				return "Peer"
 			}
 		}
 	});
@@ -148,7 +209,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			await timeout(3000);
 		}
 	}
-	
+
 	async function acceptAnswer() {
 		while (true) {
 			console.log('Get me the answers for my offer');
@@ -160,6 +221,10 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			await timeout(3000);
 		}
 	}
+
+	v.pcs.local = new RTCPeerConnection(v.rpcConfig);
+	v.pcs.local.addEventListener('icecandidate', e => v.onIceCandidate(v.pcs.local, e));
+	v.pcs.local.addEventListener('iceconnectionstatechange', e => v.onIceStateChange(v.pcs.local, e));
 
 	syncChannel();
 	acceptAnswer();
