@@ -55,7 +55,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 				v.pcs.local.addEventListener('track',
 					function(e) {
 						video = document.getElementById('media');
-						alert("hello world!")
+						alert("connecting to the server...")
 						if (video.srcObject !== e.streams[0]) {
 							video.srcObject = e.streams[0];
 							console.log('recieve remote stream');
