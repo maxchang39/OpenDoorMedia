@@ -18,6 +18,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			offerIds: [],
 			pcs: [],
 			offers: {},
+			leftTopIndication: "No Source",
 			rpcConfig: {
 				iceServers: [{
 						urls: 'stun:stun.l.google.com:19302'
@@ -56,10 +57,9 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 					try {
 						var scp = data.data.data;
 						console.log(scp);
-						v.pcs.local.setRemoteDescription(new RTCSessionDescription(scp));
+						v.pcs.local.setRemoteDescription(scp);
 						answer = await v.pcs.local.createAnswer(this.answerConfig);
-						v.pcs.local.setLocalDescription(new RTCSessionDescription(answer));
-
+						await v.pcs.local.setLocalDescription(answer);
 						coordinator.createAnswer(data.id, answer);
 						v.pcs.local.addEventListener('track',
 							function(e) {
@@ -68,6 +68,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 								if (video.srcObject !== e.streams[0]) {
 									video.srcObject = e.streams[0];
 									console.log('recieve remote stream');
+									v.leftTopIndication = "Live";
 								}
 							}
 						);
@@ -82,6 +83,8 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 				this.playing = false;
 				video.srcObject = null;
 				this.localStream = false;
+				this.
+				leftTopIndication = "No Source"
 			},
 
 			async startStreaming() {
@@ -90,10 +93,6 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 				if (confirm("Start broadcasting your channel?")) {
 					this.streaming = true;
 					console.log('Initialize peer connection object');
-
-					// 					v.pcs.local.addEventListener('icecandidate', e => v.onIceCandidate(v.pcs.local, e));
-					// 					v.pcs.local.addEventListener('iceconnectionstatechange', e => v.onIceStateChange(v.pcs.local, e));
-					// 					
 					if (this.localStream == null) {
 						this.streaming = false;
 						alert("Local stream has not started, please try again");
@@ -102,10 +101,10 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 						v.pcs.local.addTrack(this.localStream.getTracks()[0], this.localStream);
 						try {
 							offer = await v.pcs.local.createOffer(this.offerConfig);
-							await v.pcs.local.setLocalDescription(new RTCSessionDescription(offer));
+							await v.pcs.local.setLocalDescription(offer);
 
 							this.channelName = prompt("Please enter your channel name", "Channel Name");
-							v.syncIces(v.channelName);
+							// v.syncIces(v.channelName);
 
 							coordinator.createOffer(this.channelName, offer,
 								function(data) {
@@ -131,7 +130,6 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 
 			onAcceptAnswer(data) {
 				v = this;
-				console.log(data.data);
 				v.pcs.local.setRemoteDescription(new RTCSessionDescription(data.data));
 				console.log("Connection done, ready to broadcast");
 			},
@@ -158,18 +156,12 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			async onIceCandidate(pc, event) {
 				if (v.connectedChannel == "") {
 					try {
-						coordinator.createIceCandidate("ash", event.candidate, function() {});
+						coordinator.createIceCandidate(v.channelName, event.candidate, function() {});
 					} catch (e) {
 						console.log("create ice failed on local name");
 					}
-				} else {
-					try {
-						coordinator.createIceCandidate("siddhant", event.candidate, function() {});
-					} catch (e) {
-						console.log("create ice failed on remote name");
-					}
 				}
-				console.log(`${this.getName(pc)} ICE candidate:\n${event.candidate ? event.candidate.candidate : '(null)'}`);
+				//console.log(`${this.getName(pc)} ICE candidate:\n${event.candidate ? event.candidate.candidate : '(null)'}`);
 			},
 
 			onIceStateChange(pc, event) {
@@ -185,11 +177,11 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 
 			async syncIces(name) {
 				while (true) {
-					if (v.connectedChannel == "") {
-						name = "siddhant";
-					} else {
-						name = "ash";
-					}
+// 					if (v.connectedChannel == "") {
+// 						name = "4321";
+// 					} else {
+// 						name = "1234";
+// 					}
 					console.log(name);
 					
 					coordinator.getIceByChannel(name, function(data) {
@@ -198,7 +190,7 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 							v.pcs.local.addIceCandidate(ice.data.data);
 						});
 					});
-					await timeout(3000);
+					await timeout(10000);
 				}
 			},
 
@@ -227,16 +219,22 @@ define(['vue', 'common', "jquery", "coordinator"], function(Vue, common, $, coor
 			console.log('Get me the answers for my offer');
 			v.offerIds.forEach(async function(id) {
 				coordinator.getAnswerByOfferId(id, function(data) {
-					v.onAcceptAnswer(data);
+					console.log(data);
+					if(data.data != undefined) {
+						console.log("Aceept new answer");
+						v.onAcceptAnswer(data);
+					} else {
+						console.log("No answer available");
+					}
 				});
 			});
-			await timeout(3000);
+			await timeout(5000);
 		}
 	}
 
 	v.pcs.local = new RTCPeerConnection(v.rpcConfig);
-	v.pcs.local.addEventListener('icecandidate', e => v.onIceCandidate(v.pcs.local, e));
-	v.pcs.local.addEventListener('iceconnectionstatechange', e => v.onIceStateChange(v.pcs.local, e));
+ 	v.pcs.local.addEventListener('icecandidate', e => v.onIceCandidate(v.pcs.local, e));
+ 	v.pcs.local.addEventListener('iceconnectionstatechange', e => v.onIceStateChange(v.pcs.local, e));
 
 	syncChannel();
 	acceptAnswer();
